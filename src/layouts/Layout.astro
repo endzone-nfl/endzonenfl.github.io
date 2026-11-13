@@ -13,7 +13,6 @@ const nav = [
   { href: '/positionen/', label: 'Positionen' },
   { href: '/schemes/', label: 'Schemes' },
   { href: '/playoff-picture/', label: 'Playoff Picture' },
-  { href: '/hall-of-fame/', label: 'Hall of Fame' },
 ];
 const current = Astro.url.pathname;
 
@@ -29,7 +28,7 @@ const nameStart = akzent ? site.name.slice(0, -akzent.length) : site.name;
     <title>{title ? `${title} | ${site.name}` : `${site.name} – ${site.claim}`}</title>
     <meta
       name="description"
-      content="NFL-Regeln, Positionen und Schemes auf Deutsch erklärt, dazu das aktuelle Playoff Picture und die Hall of Fame unserer Fantasy-Liga."
+      content="NFL-Regeln, Positionen und Schemes auf Deutsch erklärt, dazu das aktuelle Playoff Picture."
     />
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
   </head>

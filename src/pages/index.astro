@@ -2,7 +2,6 @@
 import Layout from '../layouts/Layout.astro';
 import { url } from '../lib/url.js';
 import standings from '../data/standings.json';
-import champions from '../data/hall-of-fame.json';
 import { regeln } from '../data/regeln.js';
 import { positionen } from '../data/positionen.js';
 import { schemes } from '../data/schemes.js';
@@ -13,7 +12,6 @@ const stand = new Date(standings.updated).toLocaleDateString('de-DE', {
   timeZone: 'Europe/Berlin',
 });
 const bilanz = (t) => `${t.wins}-${t.losses}${t.ties ? `-${t.ties}` : ''}`;
-const letzter = [...champions].sort((a, b) => b.saison - a.saison)[0];
 
 const bereiche = [
   { href: '/regeln/', titel: 'Regeln', text: 'Offside, Holding, Pass Interference: jede Flagge erklärt.', zahl: regeln.length },
@@ -28,8 +26,7 @@ const bereiche = [
       <p class="eyebrow">NFL &amp; Fantasy Football</p>
       <h1>Football verstehen.<br />Playoffs verfolgen.</h1>
       <p class="lead">
-        Regeln, Positionen und Schemes auf Deutsch erklärt. Dazu das aktuelle Playoff Picture und die Champions
-        unserer Fantasy-Liga.
+        Regeln, Positionen und Schemes auf Deutsch erklärt. Dazu das aktuelle Playoff Picture.
       </p>
       <form class="suche" action={url('/regeln/')} method="get" role="search">
         <label for="start-suche">Regel nachschlagen</label>
@@ -85,23 +82,6 @@ const bereiche = [
           ))
         }
       </div>
-    </section>
-
-    <section class="section">
-      <div class="kopf">
-        <h2>Hall of Fame</h2>
-        <a class="mehr" href={url('/hall-of-fame/')}>Alle Champions</a>
-      </div>
-      {
-        letzter ? (
-          <p class="champ">
-            <span class="badge red">Champion {letzter.saison}</span> <strong>{letzter.manager}</strong>
-            {letzter.team && <span class="muted"> · {letzter.team}</span>}
-          </p>
-        ) : (
-          <p class="muted">Die Champions unserer Fantasy-Liga werden hier bald verewigt.</p>
-        )
-      }
     </section>
   </div>
 </Layout>
@@ -256,8 +236,5 @@ const bereiche = [
   }
   .seeds .r {
     font-weight: 600;
-  }
-  .champ {
-    font-size: 1.1rem;
   }
 </style>

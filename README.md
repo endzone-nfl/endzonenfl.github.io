@@ -10,7 +10,6 @@ Deutschsprachige Website rund um NFL und Fantasy Football, gebaut mit [Astro](ht
 | Positionen | Alle Positionen mit Aufstellungsgrafik | `src/data/positionen.js` |
 | Schemes | Formationen, Systeme, Coverages | `src/data/schemes.js` |
 | Playoff Picture | Seeds beider Conferences | `src/data/standings.json` (automatisch) |
-| Hall of Fame | Fantasy-Champions | `src/data/hall-of-fame.json` |
 
 ## Name ändern
 
@@ -21,16 +20,6 @@ Der Seitenname steht nur in `src/config.js` (`name`, optional `nameAkzent` für 
 ```bash
 npm install
 npm run dev
-```
-
-## Hall of Fame pflegen
-
-Einträge in `src/data/hall-of-fame.json` ergänzen. Pflicht sind nur `saison` und `manager`:
-
-```json
-[
-  { "saison": 2024, "manager": "Name", "team": "Teamname", "bilanz": "10-4", "finale": "132,4 : 118,9 gegen …", "notiz": "freier Text" }
-]
 ```
 
 ## Playoff Picture
