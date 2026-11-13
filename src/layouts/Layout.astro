@@ -4,6 +4,7 @@ import '@fontsource/oswald/600.css';
 import '@fontsource/oswald/700.css';
 import '../styles/global.css';
 import { url } from '../lib/url.js';
+import { site } from '../config.js';
 
 const { title, eyebrow, heading, lead } = Astro.props;
 
@@ -15,6 +16,9 @@ const nav = [
   { href: '/hall-of-fame/', label: 'Hall of Fame' },
 ];
 const current = Astro.url.pathname;
+
+const akzent = site.nameAkzent && site.name.endsWith(site.nameAkzent) ? site.nameAkzent : '';
+const nameStart = akzent ? site.name.slice(0, -akzent.length) : site.name;
 ---
 
 <!doctype html>
@@ -22,7 +26,7 @@ const current = Astro.url.pathname;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title ? `${title} | Endzone` : 'Endzone – NFL & Fantasy Football'}</title>
+    <title>{title ? `${title} | ${site.name}` : `${site.name} – ${site.claim}`}</title>
     <meta
       name="description"
       content="NFL-Regeln, Positionen und Schemes auf Deutsch erklärt, dazu das aktuelle Playoff Picture und die Hall of Fame unserer Fantasy-Liga."
@@ -32,7 +36,7 @@ const current = Astro.url.pathname;
   <body>
     <header class="site-header">
       <div class="wrap">
-        <a class="brand" href={url('/')}>End<span>zone</span></a>
+        <a class="brand" href={url('/')}>{nameStart}{akzent && <span>{akzent}</span>}</a>
         <nav class="site-nav" aria-label="Hauptnavigation">
           {
             nav.map((item) => (

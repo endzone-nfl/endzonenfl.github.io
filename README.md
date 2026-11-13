@@ -12,6 +12,10 @@ Deutschsprachige Website rund um NFL und Fantasy Football, gebaut mit [Astro](ht
 | Playoff Picture | Seeds beider Conferences | `src/data/standings.json` (automatisch) |
 | Hall of Fame | Fantasy-Champions | `src/data/hall-of-fame.json` |
 
+## Name ändern
+
+Der Seitenname steht nur in `src/config.js` (`name`, optional `nameAkzent` für den roten Teil im Logo).
+
 ## Lokal starten
 
 ```bash
