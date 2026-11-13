@@ -1,0 +1,69 @@
+---
+import '@fontsource/oswald/500.css';
+import '@fontsource/oswald/600.css';
+import '@fontsource/oswald/700.css';
+import '../styles/global.css';
+import { url } from '../lib/url.js';
+
+const { title, eyebrow, heading, lead } = Astro.props;
+
+const nav = [
+  { href: '/regeln/', label: 'Regeln' },
+  { href: '/positionen/', label: 'Positionen' },
+  { href: '/schemes/', label: 'Schemes' },
+  { href: '/playoff-picture/', label: 'Playoff Picture' },
+  { href: '/hall-of-fame/', label: 'Hall of Fame' },
+];
+const current = Astro.url.pathname;
+---
+
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title ? `${title} | Endzone` : 'Endzone – NFL & Fantasy Football'}</title>
+    <meta
+      name="description"
+      content="NFL-Regeln, Positionen und Schemes auf Deutsch erklärt, dazu das aktuelle Playoff Picture und die Hall of Fame unserer Fantasy-Liga."
+    />
+    <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href={url('/')}>End<span>zone</span></a>
+        <nav class="site-nav" aria-label="Hauptnavigation">
+          {
+            nav.map((item) => (
+              <a href={url(item.href)} aria-current={current.endsWith(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      {
+        heading && (
+          <div class="page-head">
+            <div class="wrap">
+              {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+              <h1>{heading}</h1>
+              {lead && <p class="lead">{lead}</p>}
+            </div>
+          </div>
+        )
+      }
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        Private Fanseite, nicht mit der NFL oder ihren Teams verbunden. Tabellendaten: ESPN.
+      </div>
+    </footer>
+  </body>
+</html>

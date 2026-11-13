@@ -1,0 +1,20 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Glossar from '../components/Glossar.astro';
+import { regeln } from '../data/regeln.js';
+---
+
+<Layout
+  title="Regeln"
+  eyebrow="Regelbuch"
+  heading="NFL-Regeln zum Nachschlagen"
+  lead="Was ist Offside, wann gibt es Pass Interference und wie viele Yards kostet das? Such nach einem Begriff oder filtere nach Kategorie."
+>
+  <Glossar eintraege={regeln} platzhalter="Begriff suchen, z. B. Offside, Holding, 15 Yards …" />
+  <div class="wrap">
+    <p class="note">
+      Die Erklärungen sind bewusst vereinfacht. Die NFL passt ihr Regelwerk jedes Jahr an, Details wie Strafmaße oder
+      Kickoff-Regeln können sich also ändern.
+    </p>
+  </div>
+</Layout>

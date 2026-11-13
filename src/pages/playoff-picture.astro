@@ -1,0 +1,272 @@
+---
+import Layout from '../layouts/Layout.astro';
+import standings from '../data/standings.json';
+
+const stand = new Date(standings.updated).toLocaleDateString('de-DE', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'Europe/Berlin',
+});
+
+const bilanz = (t) => `${t.wins}-${t.losses}${t.ties ? `-${t.ties}` : ''}`;
+
+// ESPN-Kürzel für bereits entschiedene Plätze
+const clinch = {
+  '*': 'Seed 1 und Bye sicher',
+  z: 'Division gewonnen',
+  y: 'Wild Card sicher',
+  x: 'Playoffs sicher',
+  e: 'Ausgeschieden',
+};
+
+const rolle = (t) => (t.seed === 1 ? 'Bye' : t.seed <= 4 ? 'Division' : t.seed <= 7 ? 'Wild Card' : '');
+
+const conferences = standings.conferences.map((c) => {
+  const drin = c.teams.filter((t) => t.seed <= 7);
+  const jagd = c.teams.filter((t) => t.seed > 7);
+  const s = (n) => c.teams.find((t) => t.seed === n);
+  const spiele = [
+    [s(2), s(7)],
+    [s(3), s(6)],
+    [s(4), s(5)],
+  ];
+  return { ...c, drin, jagd, spiele, bye: s(1) };
+});
+---
+
+<Layout
+  title="Playoff Picture"
+  eyebrow={`Saison ${standings.season}`}
+  heading="Playoff Picture"
+  lead={`Wer wäre dabei, wenn die Playoffs heute beginnen würden? Stand: ${stand}. Die Seite aktualisiert sich jede Woche nach dem Monday Night Game.`}
+>
+  <div class="wrap">
+    <div class="konferenzen">
+      {
+        conferences.map((c) => (
+          <section class="konf" aria-labelledby={`h-${c.abbr}`}>
+            <h2 id={`h-${c.abbr}`}>{c.abbr}</h2>
+
+            <div class="tabelle">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col" class="num">
+                      Seed
+                    </th>
+                    <th scope="col">Team</th>
+                    <th scope="col" class="num">
+                      Bilanz
+                    </th>
+                    <th scope="col" class="num opt">
+                      Conf.
+                    </th>
+                    <th scope="col" class="num opt">
+                      Serie
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {c.drin.map((t) => (
+                    <tr class={t.seed === 1 ? 'bye' : t.seed <= 4 ? 'div' : 'wc'}>
+                      <td class="num seed">{t.seed}</td>
+                      <td>
+                        <span class="team">{t.name}</span>
+                        <span class="meta">
+                          {rolle(t)} · {c.abbr} {t.division}
+                          {clinch[t.clincher] && ` · ${clinch[t.clincher]}`}
+                        </span>
+                      </td>
+                      <td class="num rec">{bilanz(t)}</td>
+                      <td class="num opt">{t.confRecord}</td>
+                      <td class="num opt">{t.streak}</td>
+                    </tr>
+                  ))}
+                  <tr class="cut">
+                    <td colspan="5">Playoff-Grenze</td>
+                  </tr>
+                  {c.jagd.map((t) => (
+                    <tr class={t.clincher === 'e' ? 'out raus' : 'out'}>
+                      <td class="num seed">{t.seed}</td>
+                      <td>
+                        <span class="team">{t.name}</span>
+                        <span class="meta">
+                          {c.abbr} {t.division}
+                          {clinch[t.clincher] && ` · ${clinch[t.clincher]}`}
+                        </span>
+                      </td>
+                      <td class="num rec">{bilanz(t)}</td>
+                      <td class="num opt">{t.confRecord}</td>
+                      <td class="num opt">{t.streak}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <h3>Wild Card Round nach heutigem Stand</h3>
+            <ul class="spiele">
+              {c.spiele.map(([heim, gast]) => (
+                <li>
+                  <span class="s">{gast.seed}</span>
+                  <span>{gast.name}</span>
+                  <span class="at">bei</span>
+                  <span class="s">{heim.seed}</span>
+                  <span>{heim.name}</span>
+                </li>
+              ))}
+              <li class="frei">
+                <span class="s">{c.bye.seed}</span>
+                <span>{c.bye.name}</span>
+                <span class="at">spielfrei</span>
+              </li>
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+
+    <p class="note">
+      Seeds 1 bis 4 sind die Division-Sieger, Seeds 5 bis 7 die Wild Cards. Nur Seed 1 hat in der ersten Runde
+      spielfrei. „Conf.“ ist die Bilanz gegen Teams der eigenen Conference, ein wichtiger Tiebreaker. Daten: ESPN.
+    </p>
+  </div>
+</Layout>
+
+<style>
+  .konferenzen {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+    gap: 2.5rem 2rem;
+    margin-top: 2rem;
+  }
+  .konf {
+    min-width: 0;
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+  }
+  .konf h2 {
+    font-size: 2.4rem;
+    border-bottom: 3px solid var(--red);
+    padding-bottom: 0.3rem;
+  }
+  .konf h3 {
+    margin-top: 0.75rem;
+    font-size: 1.05rem;
+    color: var(--muted);
+  }
+  .tabelle {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+  th {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 0.4rem 0.6rem;
+  }
+  td {
+    padding: 0.55rem 0.6rem;
+    border-top: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  .num {
+    text-align: right;
+    white-space: nowrap;
+  }
+  th.num:first-child,
+  td.seed {
+    text-align: center;
+    width: 3rem;
+  }
+  .seed {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .team {
+    display: block;
+    font-weight: 600;
+  }
+  .meta {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .rec {
+    font-weight: 600;
+  }
+  tr.bye td {
+    background: color-mix(in srgb, var(--gold) 14%, var(--surface));
+  }
+  tr.bye .seed {
+    color: var(--gold);
+  }
+  tr.div td {
+    background: var(--surface-2);
+  }
+  tr.wc td {
+    background: var(--surface);
+  }
+  tr.cut td {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-align: center;
+    color: var(--red-soft);
+    border-top: 2px dashed var(--red);
+    padding-block: 0.3rem;
+  }
+  tr.out .seed,
+  tr.out .team {
+    color: var(--muted);
+  }
+  tr.raus .team {
+    text-decoration: line-through;
+  }
+  @media (max-width: 30rem) {
+    .opt {
+      display: none;
+    }
+  }
+  .spiele {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+  .spiele li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.55rem 0.8rem;
+  }
+  .spiele .s {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--red-soft);
+  }
+  .spiele .at {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .spiele .frei .s {
+    color: var(--gold);
+  }
+</style>

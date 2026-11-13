@@ -1,0 +1,235 @@
+/* Layout: dunkles Stadion-Navy, rote Akzente, Yard-Linien als wiederkehrendes Motiv */
+:root {
+  color-scheme: dark;
+  --bg: #050f22;
+  --surface: #0a1c3d;
+  --surface-2: #102a57;
+  --line: #1f3b6e;
+  --navy: #013369;
+  --red: #d50a0a;
+  --red-soft: #ff5a52;
+  --gold: #e9b93a;
+  --green: #3ecf8e;
+  --text: #eef2f8;
+  --muted: #9db0cc;
+  --font-display: 'Oswald', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --wrap: 68rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2.2rem, 6vw, 3.6rem);
+}
+
+h2 {
+  font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+}
+
+h3 {
+  font-size: 1.2rem;
+}
+
+p {
+  margin: 0;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--wrap);
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+/* Kopfzeile */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--navy) 92%, black);
+  border-bottom: 3px solid var(--red);
+}
+
+.site-header .wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem 1.5rem;
+  flex-wrap: wrap;
+  padding-block: 0.6rem;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.brand span {
+  color: var(--red-soft);
+}
+
+.site-nav {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.site-nav a {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 0.35rem 0.7rem;
+  border-radius: 4px;
+  color: var(--muted);
+}
+
+.site-nav a:hover {
+  color: var(--text);
+  background: rgb(255 255 255 / 0.08);
+}
+
+.site-nav a[aria-current='page'] {
+  color: var(--text);
+  background: var(--red);
+}
+
+@media (max-width: 40rem) {
+  .site-nav {
+    margin-left: 0;
+  }
+  .site-nav a {
+    padding-inline: 0.5rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* Seitenkopf mit Yard-Linien */
+.page-head {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 4.9rem, rgb(255 255 255 / 0.07) 4.9rem 5rem),
+    linear-gradient(180deg, var(--navy), var(--bg));
+  padding-block: 2.5rem 2rem;
+}
+
+.page-head .eyebrow {
+  font-family: var(--font-display);
+  color: var(--red-soft);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+.page-head .lead {
+  color: var(--muted);
+  max-width: 42rem;
+  margin-top: 0.8rem;
+  font-size: 1.05rem;
+}
+
+main {
+  flex: 1;
+  padding-bottom: 4rem;
+}
+
+.section {
+  margin-top: 2.5rem;
+}
+
+.section > h2 {
+  margin-bottom: 1rem;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.note {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin-top: 1.5rem;
+  max-width: 46rem;
+}
+
+.badge {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.5rem;
+  border-radius: 3px;
+  background: var(--surface-2);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.badge.red {
+  background: var(--red);
+}
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding-block: 1.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+[hidden] {
+  display: none !important;
+}

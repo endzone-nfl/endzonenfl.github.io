@@ -1,0 +1,14 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Glossar from '../components/Glossar.astro';
+import { schemes } from '../data/schemes.js';
+---
+
+<Layout
+  title="Schemes"
+  eyebrow="Playbook"
+  heading="Schemes, Formationen und Coverages"
+  lead="Von 11 Personnel bis Cover 3: die Begriffe, die Kommentatoren ständig benutzen, kurz erklärt."
+>
+  <Glossar eintraege={schemes} platzhalter="Scheme suchen, z. B. Cover 2, RPO, Nickel …" />
+</Layout>

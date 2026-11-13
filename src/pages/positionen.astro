@@ -1,0 +1,147 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Glossar from '../components/Glossar.astro';
+import { positionen } from '../data/positionen.js';
+
+// Aufstellung: 11 Personnel (Shotgun) gegen Nickel-Defense. Koordinaten im viewBox 600 × 330.
+const offense = [
+  { k: 'WR', x: 60, y: 192, id: 'wide-receiver' },
+  { k: 'LT', x: 236, y: 192, id: 'offensive-tackle' },
+  { k: 'LG', x: 268, y: 192, id: 'guard' },
+  { k: 'C', x: 300, y: 192, id: 'center' },
+  { k: 'RG', x: 332, y: 192, id: 'guard' },
+  { k: 'RT', x: 364, y: 192, id: 'offensive-tackle' },
+  { k: 'TE', x: 398, y: 192, id: 'tight-end' },
+  { k: 'WR', x: 470, y: 206, id: 'slot-receiver' },
+  { k: 'WR', x: 545, y: 206, id: 'wide-receiver' },
+  { k: 'QB', x: 300, y: 250, id: 'quarterback' },
+  { k: 'RB', x: 340, y: 256, id: 'running-back' },
+];
+const defense = [
+  { k: 'DE', x: 214, y: 158, id: 'defensive-end' },
+  { k: 'DT', x: 280, y: 158, id: 'defensive-tackle' },
+  { k: 'DT', x: 322, y: 158, id: 'defensive-tackle' },
+  { k: 'DE', x: 422, y: 158, id: 'defensive-end' },
+  { k: 'LB', x: 262, y: 112, id: 'linebacker' },
+  { k: 'LB', x: 344, y: 112, id: 'linebacker' },
+  { k: 'CB', x: 60, y: 150, id: 'cornerback' },
+  { k: 'NB', x: 470, y: 150, id: 'nickelback' },
+  { k: 'CB', x: 545, y: 150, id: 'cornerback' },
+  { k: 'FS', x: 230, y: 40, id: 'free-safety' },
+  { k: 'SS', x: 390, y: 62, id: 'strong-safety' },
+];
+---
+
+<Layout
+  title="Positionen"
+  eyebrow="Kader"
+  heading="Wer steht wo?"
+  lead="Alle Positionen in Offense, Defense und Special Teams. Tipp auf einen Spieler in der Aufstellung, um zur Erklärung zu springen."
+>
+  <div class="wrap">
+    <figure class="feld">
+      <div class="scroll">
+        <svg viewBox="0 0 600 330" role="img" aria-label="Aufstellung: Offense mit drei Receivern gegen Nickel-Defense">
+          <rect x="0" y="0" width="600" height="330" rx="10" class="rasen"></rect>
+          {[30, 75, 120, 220, 265, 310].map((y) => <line x1="0" x2="600" y1={y} y2={y} class="yard" />)}
+          <line x1="0" x2="600" y1="175" y2="175" class="los"></line>
+          <text x="88" y="169" class="hinweis klein">Line of Scrimmage</text>
+          <text x="10" y="22" class="hinweis">Defense</text>
+          <text x="10" y="320" class="hinweis">Offense</text>
+          {
+            defense.map((p) => (
+              <a href={`#${p.id}`}>
+                <circle cx={p.x} cy={p.y} r="15" class="def" />
+                <text x={p.x} y={p.y + 4.5} class="lbl">
+                  {p.k}
+                </text>
+              </a>
+            ))
+          }
+          {
+            offense.map((p) => (
+              <a href={`#${p.id}`}>
+                <circle cx={p.x} cy={p.y} r="15" class="off" />
+                <text x={p.x} y={p.y + 4.5} class="lbl">
+                  {p.k}
+                </text>
+              </a>
+            ))
+          }
+        </svg>
+      </div>
+      <figcaption class="muted">
+        Die häufigste Aufstellung der Liga: 11 Personnel (1 Running Back, 1 Tight End, 3 Receiver) gegen eine
+        Nickel-Defense mit fünf Defensive Backs.
+      </figcaption>
+    </figure>
+  </div>
+
+  <Glossar eintraege={positionen} platzhalter="Position suchen, z. B. QB, Edge, Slot …" />
+</Layout>
+
+<style>
+  .feld {
+    margin: 1.75rem 0 0;
+  }
+  .scroll {
+    overflow-x: auto;
+  }
+  svg {
+    display: block;
+    width: 100%;
+    min-width: 30rem;
+    max-width: 46rem;
+    margin-inline: auto;
+    font-family: var(--font-display);
+  }
+  figcaption {
+    font-size: 0.9rem;
+    max-width: 46rem;
+    margin: 0.7rem auto 0;
+  }
+  .rasen {
+    fill: var(--surface);
+    stroke: var(--line);
+  }
+  .yard {
+    stroke: rgb(255 255 255 / 0.09);
+    stroke-width: 1;
+  }
+  .los {
+    stroke: var(--gold);
+    stroke-width: 2;
+    stroke-dasharray: 6 5;
+  }
+  .hinweis {
+    fill: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .klein {
+    font-size: 9.5px;
+  }
+  .off {
+    fill: var(--red);
+    stroke: #fff;
+    stroke-width: 1.5;
+  }
+  .def {
+    fill: var(--navy);
+    stroke: #fff;
+    stroke-width: 1.5;
+  }
+  .lbl {
+    fill: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    text-anchor: middle;
+    pointer-events: none;
+  }
+  a:hover circle,
+  a:focus-visible circle {
+    stroke: var(--gold);
+    stroke-width: 3;
+  }
+</style>

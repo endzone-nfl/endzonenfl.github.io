@@ -1,0 +1,208 @@
+---
+// Durchsuchbare Liste von Einträgen: { id, titel, kategorie, kurz?, alias?, text }
+const { eintraege, platzhalter = 'Suchen …' } = Astro.props;
+const kategorien = [...new Set(eintraege.map((e) => e.kategorie))];
+const sortiert = [...eintraege];
+---
+
+<div class="glossar wrap" data-glossar>
+  <div class="tools">
+    <label class="search">
+      <span class="sr-only">Suche</span>
+      <input type="search" id="glossar-suche" placeholder={platzhalter} autocomplete="off" />
+    </label>
+    <div class="chips" role="group" aria-label="Kategorie">
+      <button type="button" class="chip" data-kat="" aria-pressed="true">Alle</button>
+      {
+        kategorien.map((k) => (
+          <button type="button" class="chip" data-kat={k} aria-pressed="false">
+            {k}
+          </button>
+        ))
+      }
+    </div>
+    <p class="count muted" aria-live="polite"><span data-count>{eintraege.length}</span> Einträge</p>
+  </div>
+
+  <div class="liste">
+    {
+      sortiert.map((e) => (
+        <article
+          class="eintrag"
+          id={e.id}
+          data-kat={e.kategorie}
+          data-such={[e.titel, ...(e.alias ?? []), e.kurz ?? '', e.kategorie, e.text].join(' ').toLowerCase()}
+        >
+          <header>
+            <h3>
+              <a href={`#${e.id}`}>{e.titel}</a>
+            </h3>
+            {e.kurz && <span class="badge red">{e.kurz}</span>}
+            <span class="badge">{e.kategorie}</span>
+          </header>
+          {e.alias?.length > 0 && <p class="alias muted">Auch: {e.alias.join(', ')}</p>}
+          <p>{e.text}</p>
+        </article>
+      ))
+    }
+  </div>
+  <p class="leer muted" hidden>Kein Treffer. Versuch es mit einem anderen Begriff oder wähle „Alle“.</p>
+</div>
+
+<script>
+  const norm = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[̀-ͯ]/g, '');
+
+  document.querySelectorAll<HTMLElement>('[data-glossar]').forEach((root) => {
+    const input = root.querySelector<HTMLInputElement>('input[type=search]')!;
+    const chips = [...root.querySelectorAll<HTMLButtonElement>('.chip')];
+    const items = [...root.querySelectorAll<HTMLElement>('.eintrag')];
+    const count = root.querySelector<HTMLElement>('[data-count]')!;
+    const leer = root.querySelector<HTMLElement>('.leer')!;
+    const index = items.map((el) => norm(el.dataset.such ?? ''));
+    let kat = '';
+
+    const apply = () => {
+      const words = norm(input.value).split(/\s+/).filter(Boolean);
+      let n = 0;
+      items.forEach((el, i) => {
+        const show = (!kat || el.dataset.kat === kat) && words.every((w) => index[i].includes(w));
+        el.hidden = !show;
+        if (show) n++;
+      });
+      count.textContent = String(n);
+      leer.hidden = n > 0;
+    };
+
+    input.addEventListener('input', apply);
+    chips.forEach((chip) =>
+      chip.addEventListener('click', () => {
+        kat = chip.dataset.kat ?? '';
+        chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+        apply();
+      }),
+    );
+
+    const q = new URLSearchParams(location.search).get('q');
+    if (q) {
+      input.value = q;
+      apply();
+    }
+  });
+</script>
+
+<style>
+  .glossar {
+    margin-top: 1.5rem;
+  }
+  .tools {
+    position: sticky;
+    top: 3.4rem;
+    z-index: 10;
+    background: var(--bg);
+    padding-block: 0.9rem;
+    display: grid;
+    gap: 0.7rem;
+    border-bottom: 1px solid var(--line);
+  }
+  @media (max-width: 40rem) {
+    .tools {
+      position: static;
+    }
+  }
+  .search input {
+    width: 100%;
+    font: inherit;
+    font-size: 1.05rem;
+    padding: 0.7rem 0.9rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+  }
+  .search input::placeholder {
+    color: var(--muted);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .chip {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 0.25rem 0.8rem;
+    cursor: pointer;
+  }
+  .chip:hover {
+    color: var(--text);
+    border-color: var(--muted);
+  }
+  .chip[aria-pressed='true'] {
+    color: var(--text);
+    background: var(--red);
+    border-color: var(--red);
+  }
+  .count {
+    font-size: 0.85rem;
+  }
+  .liste {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 21rem), 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
+  }
+  .eintrag {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 1rem 1.1rem 1.1rem;
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+    min-width: 0;
+  }
+  .eintrag:target {
+    border-color: var(--gold);
+  }
+  .eintrag header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .eintrag h3 {
+    margin-right: auto;
+  }
+  .eintrag h3 a {
+    text-decoration: none;
+  }
+  .eintrag h3 a:hover {
+    text-decoration: underline;
+  }
+  .alias {
+    font-size: 0.85rem;
+  }
+  .eintrag p {
+    font-size: 0.95rem;
+  }
+  .leer {
+    margin-top: 1.5rem;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+</style>
