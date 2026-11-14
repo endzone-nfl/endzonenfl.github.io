@@ -13,6 +13,7 @@ const nav = [
   { href: '/positionen/', label: 'Positionen' },
   { href: '/schemes/', label: 'Schemes' },
   { href: '/playoff-picture/', label: 'Playoff Picture' },
+  { href: '/cap-space/', label: 'Cap Space' },
 ];
 const current = Astro.url.pathname;
 
@@ -28,7 +29,7 @@ const nameStart = akzent ? site.name.slice(0, -akzent.length) : site.name;
     <title>{title ? `${title} | ${site.name}` : `${site.name} – ${site.claim}`}</title>
     <meta
       name="description"
-      content="NFL-Regeln, Positionen und Schemes auf Deutsch erklärt, dazu das aktuelle Playoff Picture."
+      content="NFL-Regeln, Positionen und Schemes auf Deutsch erklärt, dazu das aktuelle Playoff Picture und ein Cap Space Tracker."
     />
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
   </head>
@@ -65,7 +66,7 @@ const nameStart = akzent ? site.name.slice(0, -akzent.length) : site.name;
 
     <footer class="site-footer">
       <div class="wrap">
-        Private Fanseite, nicht mit der NFL oder ihren Teams verbunden. Tabellendaten: ESPN.
+        Private Fanseite, nicht mit der NFL oder ihren Teams verbunden. Tabellendaten: ESPN. Cap-Daten: Over The Cap.
       </div>
     </footer>
   </body>

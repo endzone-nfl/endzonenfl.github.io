@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { url } from '../lib/url.js';
 import standings from '../data/standings.json';
+import cap from '../data/capspace.json';
 import { regeln } from '../data/regeln.js';
 import { positionen } from '../data/positionen.js';
 import { schemes } from '../data/schemes.js';
@@ -12,6 +13,15 @@ const stand = new Date(standings.updated).toLocaleDateString('de-DE', {
   timeZone: 'Europe/Berlin',
 });
 const bilanz = (t) => `${t.wins}-${t.losses}${t.ties ? `-${t.ties}` : ''}`;
+
+const capJahr = cap.years[0];
+const capMio = (n) =>
+  `${n < 0 ? '−' : '+'}${(Math.abs(n) / 1e6).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}`;
+const nachCap = [...cap.teams].sort((a, b) => b.space[capJahr] - a.space[capJahr]);
+const capListen = [
+  { titel: 'Meister Spielraum', teams: nachCap.slice(0, 5) },
+  { titel: 'Engste Kasse', teams: nachCap.slice(-5).reverse() },
+];
 
 const bereiche = [
   { href: '/regeln/', titel: 'Regeln', text: 'Offside, Holding, Pass Interference: jede Flagge erklärt.', zahl: regeln.length },
@@ -26,7 +36,7 @@ const bereiche = [
       <p class="eyebrow">NFL &amp; Fantasy Football</p>
       <h1>Football verstehen.<br />Playoffs verfolgen.</h1>
       <p class="lead">
-        Regeln, Positionen und Schemes auf Deutsch erklärt. Dazu das aktuelle Playoff Picture.
+        Regeln, Positionen und Schemes auf Deutsch erklärt. Dazu das aktuelle Playoff Picture und der Cap Space aller Teams.
       </p>
       <form class="suche" action={url('/regeln/')} method="get" role="search">
         <label for="start-suche">Regel nachschlagen</label>
@@ -77,6 +87,31 @@ const bereiche = [
                       <span class="r">{bilanz(t)}</span>
                     </li>
                   ))}
+              </ol>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="kopf">
+        <h2>Cap Space {capJahr}</h2>
+        <a class="mehr" href={url('/cap-space/')}>Alle Teams bis {cap.years.at(-1)}</a>
+      </div>
+      <p class="muted">Spielraum unter dem Salary Cap in Millionen US-Dollar.</p>
+      <div class="seeds">
+        {
+          capListen.map((l) => (
+            <div>
+              <h3>{l.titel}</h3>
+              <ol>
+                {l.teams.map((t) => (
+                  <li>
+                    <span class="n">{t.name}</span>
+                    <span class:list={['r', t.space[capJahr] < 0 ? 'minus' : 'plus']}>{capMio(t.space[capJahr])}</span>
+                  </li>
+                ))}
               </ol>
             </div>
           ))
@@ -236,5 +271,11 @@ const bereiche = [
   }
   .seeds .r {
     font-weight: 600;
+  }
+  .seeds .plus {
+    color: var(--green);
+  }
+  .seeds .minus {
+    color: var(--red-soft);
   }
 </style>

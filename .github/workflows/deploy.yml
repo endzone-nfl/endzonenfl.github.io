@@ -31,6 +31,8 @@ jobs:
       - run: npm ci
       - name: Aktuelle NFL-Tabelle holen
         run: node scripts/update-standings.mjs
+      - name: Aktuellen Cap Space holen
+        run: node scripts/update-capspace.mjs
       - run: npm run build
         env:
           SITE_URL: ${{ steps.pages.outputs.origin }}

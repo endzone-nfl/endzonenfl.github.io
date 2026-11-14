@@ -1,0 +1,304 @@
+---
+import Layout from '../layouts/Layout.astro';
+import cap from '../data/capspace.json';
+
+const stand = new Date(cap.updated).toLocaleDateString('de-DE', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'Europe/Berlin',
+});
+
+// 40399337 -> "40,4", -48857631 -> "−48,9"
+const mio = (n, vorzeichen = false) => {
+  if (n == null) return '–';
+  const v = (Math.abs(n) / 1e6).toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  return n < 0 ? `−${v}` : vorzeichen && n > 0 ? `+${v}` : v;
+};
+
+const spalten = cap.years.map((jahr) => {
+  const mitCap = cap.capYears.includes(jahr);
+  return {
+    jahr,
+    mitCap,
+    wert: (t) => (mitCap ? t.space[jahr] : t.committed[jahr]),
+    cap: cap.caps[jahr],
+  };
+});
+const erstes = spalten[0];
+const teams = [...cap.teams].sort((a, b) => erstes.wert(b) - erstes.wert(a));
+const ohneCap = spalten.filter((s) => !s.mitCap).map((s) => s.jahr);
+---
+
+<Layout
+  title="Cap Space"
+  eyebrow="Salary Cap"
+  heading="Cap Space Tracker"
+  lead={`Wie viel Spielraum hat jedes Team unter dem Salary Cap, in dieser Saison und in den drei folgenden? Stand: ${stand}. Die Zahlen aktualisieren sich jede Woche.`}
+>
+  <div class="wrap">
+    <p class="einheit muted">Alle Beträge in Millionen US-Dollar. Tipp auf eine Spaltenüberschrift, um zu sortieren.</p>
+
+    <div class="tabelle">
+      <table data-sortierbar>
+        <thead>
+          <tr>
+            <th scope="col" class="rang">#</th>
+            <th scope="col" aria-sort="none">
+              <button type="button" data-spalte="0" data-typ="text">Team</button>
+            </th>
+            {
+              spalten.map((s, i) => (
+                <th scope="col" class="num" aria-sort={i === 0 ? 'descending' : 'none'}>
+                  <button type="button" data-spalte={i + 1} data-typ="zahl">
+                    <span class="jahr">{s.jahr}</span>
+                    <span class="art">{s.mitCap ? 'Cap Space' : 'Gebunden'}</span>
+                  </button>
+                </th>
+              ))
+            }
+          </tr>
+        </thead>
+        <tbody>
+          {
+            teams.map((t, i) => (
+              <tr>
+                <td class="rang">{i + 1}</td>
+                <th scope="row" data-wert={t.name}>
+                  <span class="lang">{t.name}</span>
+                  <span class="kurz">{t.abbr}</span>
+                </th>
+                {spalten.map((s) => {
+                  const w = s.wert(t);
+                  return (
+                    <td
+                      class:list={['num', s.mitCap && w < 0 && 'minus', s.mitCap && w > 0 && 'plus', !s.mitCap && 'gebunden']}
+                      data-wert={w ?? ''}
+                    >
+                      {mio(w, s.mitCap)}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td></td>
+            <th scope="row">Salary Cap</th>
+            {spalten.map((s) => <td class="num">{s.cap ? mio(s.cap) : 'offen'}</td>)}
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="erklaerung">
+      <p>
+        <strong>Cap Space</strong> ist der Betrag, den ein Team noch ausgeben darf, bevor es die Gehaltsobergrenze
+        erreicht. Ein negativer Wert heißt: Das Team liegt nach heutigem Stand über dem Cap und muss bis zum Start
+        des Liga-Jahres Verträge umbauen oder Spieler entlassen.
+      </p>
+      {
+        ohneCap.length > 0 && (
+          <p>
+            <strong>Gebunden</strong> ({ohneCap.join(', ')}): Für dieses Jahr gibt es noch keine Prognose der
+            Gehaltsobergrenze, also auch keinen Cap Space. Die Spalte zeigt stattdessen, wie viel Geld das Team
+            bereits durch laufende Verträge verplant hat. Weniger ist hier besser.
+          </p>
+        )
+      }
+      <p class="muted">
+        Die Werte für kommende Jahre sind Momentaufnahmen: Sie enthalten nur heute bestehende Verträge und die
+        geschätzte Gehaltsobergrenze. Daten:{' '}
+        <a href="https://overthecap.com/salary-cap-space">Over The Cap</a>.
+      </p>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  document.querySelectorAll<HTMLTableElement>('table[data-sortierbar]').forEach((table) => {
+    const body = table.tBodies[0];
+    const heads = [...table.querySelectorAll<HTMLTableCellElement>('thead th[aria-sort]')];
+
+    heads.forEach((th) => {
+      const btn = th.querySelector<HTMLButtonElement>('button')!;
+      btn.addEventListener('click', () => {
+        const spalte = Number(btn.dataset.spalte) + 1; // Spalte 0 ist die Rangnummer
+        const text = btn.dataset.typ === 'text';
+        const start = text ? 'ascending' : 'descending';
+        const richtung =
+          th.getAttribute('aria-sort') === start ? (text ? 'descending' : 'ascending') : start;
+        const faktor = richtung === 'ascending' ? 1 : -1;
+
+        const rows = [...body.rows];
+        rows.sort((a, b) => {
+          const x = a.cells[spalte].dataset.wert ?? '';
+          const y = b.cells[spalte].dataset.wert ?? '';
+          if (text) return faktor * x.localeCompare(y, 'de');
+          if (x === '') return 1;
+          if (y === '') return -1;
+          return faktor * (Number(x) - Number(y));
+        });
+        rows.forEach((row, i) => {
+          row.cells[0].textContent = String(i + 1);
+          body.append(row);
+        });
+        heads.forEach((h) => h.setAttribute('aria-sort', h === th ? richtung : 'none'));
+      });
+    });
+  });
+</script>
+
+<style>
+  .einheit {
+    margin-top: 1.75rem;
+    font-size: 0.9rem;
+  }
+  .tabelle {
+    overflow-x: auto;
+    margin-top: 0.75rem;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-variant-numeric: tabular-nums;
+  }
+  thead th {
+    padding: 0;
+    vertical-align: bottom;
+    border-bottom: 3px solid var(--red);
+    text-align: left;
+  }
+  thead .rang {
+    padding: 0.5rem 0.4rem;
+  }
+  thead button {
+    all: unset;
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    cursor: pointer;
+    padding: 0.5rem 0.6rem;
+    font-family: var(--font-display);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  thead button:hover {
+    color: var(--text);
+  }
+  thead button:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: -2px;
+  }
+  thead .num button {
+    text-align: right;
+  }
+  .jahr {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .art {
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+  th[aria-sort='ascending'] button::after {
+    content: ' ▲';
+    font-size: 0.7em;
+    color: var(--gold);
+  }
+  th[aria-sort='descending'] button::after {
+    content: ' ▼';
+    font-size: 0.7em;
+    color: var(--gold);
+  }
+  tbody td,
+  tbody th,
+  tfoot td,
+  tfoot th {
+    padding: 0.5rem 0.6rem;
+    border-top: 1px solid var(--line);
+    text-align: left;
+    font-weight: 400;
+  }
+  tbody tr:nth-child(even) > * {
+    background: var(--surface);
+  }
+  tbody th {
+    font-weight: 600;
+  }
+  .rang {
+    width: 2.2rem;
+    color: var(--muted);
+    font-family: var(--font-display);
+    text-align: center;
+  }
+  tbody .num,
+  tfoot .num,
+  .num {
+    text-align: right;
+    white-space: nowrap;
+  }
+  .plus {
+    color: var(--green);
+  }
+  .minus {
+    color: var(--red-soft);
+    font-weight: 600;
+  }
+  .gebunden {
+    color: var(--muted);
+  }
+  tfoot td,
+  tfoot th {
+    border-top: 2px solid var(--line);
+    font-family: var(--font-display);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .kurz {
+    display: none;
+  }
+  @media (max-width: 34rem) {
+    .lang {
+      display: none;
+    }
+    .kurz {
+      display: inline;
+    }
+    tbody td,
+    tbody th,
+    tfoot td,
+    tfoot th,
+    thead button {
+      padding-inline: 0.35rem;
+    }
+    .jahr {
+      font-size: 1.1rem;
+    }
+    .art {
+      font-size: 0.62rem;
+      letter-spacing: 0.02em;
+    }
+    .rang {
+      width: 1.6rem;
+    }
+  }
+  .erklaerung {
+    margin-top: 1.75rem;
+    max-width: 46rem;
+    display: grid;
+    gap: 0.8rem;
+    font-size: 0.95rem;
+  }
+  .erklaerung a {
+    color: var(--red-soft);
+  }
+</style>

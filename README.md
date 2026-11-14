@@ -10,6 +10,7 @@ Deutschsprachige Website rund um NFL und Fantasy Football, gebaut mit [Astro](ht
 | Positionen | Alle Positionen mit Aufstellungsgrafik | `src/data/positionen.js` |
 | Schemes | Formationen, Systeme, Coverages | `src/data/schemes.js` |
 | Playoff Picture | Seeds beider Conferences | `src/data/standings.json` (automatisch) |
+| Cap Space | Cap Space aller Teams für vier Jahre | `src/data/capspace.json` (automatisch) |
 
 ## Name ändern
 
@@ -27,3 +28,8 @@ npm run dev
 `npm run update-standings` holt die aktuelle Tabelle von ESPN. Der Workflow
 `.github/workflows/deploy.yml` macht das jeden Dienstagmorgen (nach dem Monday Night Game)
 automatisch und veröffentlicht die Seite neu auf GitHub Pages.
+
+## Cap Space
+
+`npm run update-capspace` holt die Zahlen von Over The Cap. Der Workflow macht das im selben
+wöchentlichen Lauf. Für Jahre ohne Cap-Prognose zeigt die Seite die bereits gebundenen Summen.
